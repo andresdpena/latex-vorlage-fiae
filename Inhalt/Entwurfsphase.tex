@@ -2,57 +2,124 @@
 \section{Entwurfsphase} 
 \label{sec:Entwurfsphase}
 
-\subsection{Zielplattform}
-\label{subsec:Zielplattform}
+\subsection{Systemarchitektur}
+\label{subsec:Systemarchitektur}
 
+Die Anwendung ist als modulares System im OSGi-Kontext aufgebaut, was die dynamische Verwaltung und Erweiterbarkeit ermöglicht.
+Jedes Modul, auch als Bundle bezeichnet, implementiert und verfolgt eine klare Zuständigkeit und trägt zur Gesamtfunktionalität des Systems bei z.B.
+die Authentisierung, Authentifizierung und Autorisierung von Benutzern über ein IAM-System oder das Einbinden von Frontend-Komponenten in die Hauptapplikation.
+Die OSGi-Architektur besteht aus den folgenden Schichten:
+
+\subsubsection{Modulschicht}
+\label{subsubsec:Modulschicht}
+
+Die Modulschicht enthält die OSGi-Bundles und verwaltet sie anhand von vorhandenen Metadaten.\ Bei OSGi gibt es keine globale Klassenpfade, sondern werden die
+Abhängigkeiten von jedem Bundle explizit in der Manifestdatei definiert.\ Dadurch kann das Framework den Klassenpfad für jedes Bundle einzeln berechnen und somit mehrere
+Versionen von einer Komponente gleichzeitig verwalten.
+
+\subsubsection{Lebenszyklusebene}
+\label{subsubsec:Lebenszyklusebene}
+
+Auf dieser Ebene erfolgt das dynamische Management von Bundles ganz unabhängig von der Laufzeit der JVM. Module können jederzeit installiert, gestartet, gestoppt oder
+deinstalliert werden, was die Entwicklungsgeschwindigkeiten maßgeblich erhöht.\ Bevor ein Bundle gestartet wird, stellt das Framework sicher,
+dass alle Abhängigkeiten aufgelöst sind, um Ausnahmebedingungen wie "`ClassNotFound-Exception"' zur Laufzeit zu reduzieren.\ Eine nicht aufgelöste Abhängigkeit führt umvermeidlich
+zu dem Nichtstarten eines Bundles.
+
+\subsubsection{Serviceschicht}
+\label{subsubsec:Serviceschicht}
+
+In der Serviceschicht befindet sich die \textit{OSGi-Service Registry}, auf die Bundles ihre Services veröffentlichen, damit sie von anderen Bundles verwendet werden können. Der Lebenszyklus
+eines Services unterscheidet sich nicht von dem des Bundles, das sie bereitstellt.\ Die Suche nach Services erfolgt mit dem Schnittstellennamen, mit dem sie in der Registry veröffentlicht wurden.
+
+Für neue Modul namens \textit{LoginAudit} wurde eine modulare Architektur verwendet.\ Das bedeutet, dass das System in einzelnen Untermodulen unterteilt wurde, um die Zuständigkeiten voneinander
+abzutrennen.
+
+%TODO: Muss eventuell ergänzt werden. Service!
 \begin{itemize}
-	\item Kriterium 1
-	\item Kriterium 2
-	\item usw.
+	\item \textbf{API:} Schnittstelle zu anderen Modulen, die nur generische Methoden zur Verfügung gestellt.\ Die interne Geschäftslogik wird dabei nicht offengelegt.
+	\item \textbf{Parent:} Im Parent-Modul werden alle gemeinsame Konfigurationen und Abhängigkeiten aufgelistet, die von den Submodulen gemeinsam benutzt werden.
+	\item \textbf{Service:} Enthält die eigentliche Geschäftslogik.\ Der Service implementiert die Methoden, die von der Schnittstelle bereitgestellt werden, und kontrolliert den Zugriff auf die Anwendungsdatenbank.\ Um von anderen Modulen auf die Implementierung zugreifen zu können, muss die API als Abhängigkeit importiert werden.
 \end{itemize}
 
-
-\subsection{Architekturdesign}
-\label{sec:Architekturdesign}
-\begin{itemize}
-	\item Beschreibung und Begründung der gewählten Anwendungsarchitektur (\zB \acs{MVC}).
-	\item \Ggfs Bewertung und Auswahl von verwendeten Frameworks sowie \ggfs eine kurze Einführung in die Funktionsweise des verwendeten Frameworks.
-\end{itemize}
-
-\paragraph{Beispiel}
-Anhand der Entscheidungsmatrix in Tabelle~\ref{tab:Entscheidungsmatrix} wurde für die Implementierung der Anwendung das \acs{PHP}-Framework Symfony\footnote{\Vgl \citet{Symfony}.} ausgewählt. 
-
-\tabelle{Entscheidungsmatrix}{tab:Entscheidungsmatrix}{Nutzwert.tex}
-
-
-\subsection{Entwurf der Benutzeroberfläche}
-\label{sec:Benutzeroberflaeche} 
-\begin{itemize}
-	\item Entscheidung für die gewählte Benutzeroberfläche (\zB GUI, Webinterface).
-	\item Beschreibung des visuellen Entwurfs der konkreten Oberfläche (\zB Mockups, Menüführung).
-	\item \Ggfs Erläuterung von angewendeten Richtlinien zur Usability und Verweis auf Corporate Design.
-\end{itemize}
-
-\paragraph{Beispiel}
-Beispielentwürfe finden sich im \Anhang{app:Entwuerfe}.
-
+Mit dem Ziel, die Geschäftslogik vom Datenbankzugriff klar voneinander zu trennen, hat sich der Autor für eine Schichtenarchitektur im Service-Modul entschieden.\ Die Logikschicht validiert die Daten,
+erzeugt Ausnahmemeldungen bei fehlerhaften Eingabeparametern und interagiert mit der Persistenzschicht über eine gemeinsame Schnittstelle.\ Auf der anderen Seite gibt es in der Datenbankschicht eine übergeordnete Klasse,
+deren Funktion darin besteht, über DAO-Instanzen dem Aufrufer Zugriff auf die Datenbank zu gewähren.
 
 \subsection{Datenmodell}
-\label{sec:Datenmodell}
+\label{subsec:Datenmodell}
+
+Das Datenmodell definiert die Struktur und Beziehungen der in der Anwendung gespeicherten Daten.\ Die Grundlage bildet eine relationale Datenbank, die das Speichern und Abrufen der benötigten Daten ermöglicht.
+
+\subsubsection{Datenbankstruktur}
+
+Für die Datenhaltung wurde die bereits bestehende relationale Datenbank um zusätzlichen Tabellen erweitert, mit denen die Login-Informationen organisiert werden.\ Es wurden folgende Tabellen angelegt:
 
 \begin{itemize}
-	\item Entwurf/Beschreibung der Datenstrukturen (\zB \acs{ERM} und/oder Tabellenmodell, \acs{XML}-Schemas) mit kurzer Beschreibung der wichtigsten (!) verwendeten Entitäten.
+	\item \textbf{LoginHistory:} Enthält Informationen über eine Anmeldung, einschließlich Anmeldedatum, die Benutzer-ID, die IP-Adresse sowie einen Verweis auf einen bestehenden Client.
+	\item \textbf{Client:} Besteht ausschließlich aus Fremdschlüsselbeziehungen zu den Tabellen UserAgent, Os und Device.\ Diese Tabelle bildet die grundlegenden Daten eines Clients ab wie der UserAgent, das Betriebssystem sowie das Gerät, welche für die Anmeldung verwendet wurden.
+	\item \textbf{UserAgent:} Der erste Teil vom User-Agent-String besteht aus dem vom Benutzer verwendeten Browser.\ Aus diesem Grund setzt sich diese Tabelle aus den Spalten "ÙserAgentId"', "family"' (Familie) und die Versionsnummer, unterteilt in "major"', "minor"' und "patch"', zusammen.
+	\item \textbf{Os:} Speichert Informationen über das Betriebssystem und weist eine ähnliche Struktur wie die UserAgent-Tabelle auf.
+	\item \textbf{Device:} Zeichnet das für die Anmeldung verwendete Gerät auf.\ Diese Tabelle besteht nur aus den Spalten "`DeviceID"' und "`Family"'.
 \end{itemize}
 
-\paragraph{Beispiel}
-In \Abbildung{ER} wird ein \ac{ERM} dargestellt, welches lediglich Entitäten, Relationen und die dazugehörigen Kardinalitäten enthält. 
+%TODO: Anhang Tabellenmodell hinzufügen. Eventuell eine Beschreibung der Tabellenbeziehungen sinnvoll
+Die Beziehungen zwischen den Tabellen werden im ER-Diagramm (Anhang ) dargestellt, welches die logische Struktur des Datenmodells veranschaulicht.
 
-\begin{figure}[htb]
-\centering
-\includegraphicsKeepAspectRatio{ERDiagramm.pdf}{0.6}
-\caption{Vereinfachtes ER-Modell}
-\label{fig:ER}
-\end{figure} 
+\subsubsection{Datenfluss und Datenzugriff}
+Zur Abbildung der Datenbanktabellen in Java-Objekte wird das ORM-Framework JPA verwendet, was die Datenmanipulation vereinfacht, indem Objekte der Anwendung Tabellen in der Datenbank direkt ansprechen können.\ Eine solche Art von Objekt wird
+in diesem Zusammenhang als Entity (Entität) bezeichnet.\ Für jede der oben beschriebenen Datenbanktabellen wurde eine Entität im Service-Modul angelegt.\ Diese bilden ein-zu-eins das für die Umsetzung definierte Datenmodel.\ Der Zugriff auf die Daten erfolgt über
+DAO-Klassen, die CRUD-Operationen wie \textit{create, read, update} und \textit{delete} ermöglichen.\ Nur DAO-Klassen dürfen Operationen auf Entitäten direkt durchführen, somit bilden sie die äußere Grenze der Persistenzschicht eines Moduls ab.
+
+%\paragraph{Beispiel}
+%In \Abbildung{ER} wird ein \ac{ERM} dargestellt, welches lediglich Entitäten, Relationen und die dazugehörigen Kardinalitäten enthält.
+%
+%\begin{figure}[htb]
+%	\centering
+%	\includegraphicsKeepAspectRatio{ERDiagramm.pdf}{0.6}
+%	\caption{Vereinfachtes ER-Modell}
+%	\label{fig:ER}
+%\end{figure}
+
+\subsection{Entwurf der Benutzeroberfläche}
+\label{subsec:Benutzeroberflaeche}
+
+Vor der Implementierung wurde ein Prototyp entworfen, der in Anhang ... zu sehen ist.\ Dabei wurden die Design-Vorgaben und Usability-Anforderungen vom Product Owner stets berücksichtigt.
+Der Zugriff auf den Anmeldeverlauf erfolgt über das Dashboard der Anwendung nach einer erfolgreichen Anmeldung über die Weboberfläche.\ Dafür wurde eine Schaltfläche mit dem Text "`Anmeldeverlauf ansehen"' unter
+Anmeldeinformationen hinzugefügt.\ Nach einmaligen Klick wird ein \textit{Popup}-Fenster eingeblendet, welches den Anmeldeverlauf in tabellarischer Form darstellt.\ Nur die wichtigsten Informationen wie Anmeldedatum, IP-Adresse,
+Browser, Betriebssystem und Gerät werden dem Benutzer angezeigt.\ Die in der Datenbank gespeicherten IDs dienen ausschließlich der Datenverwaltung im Backend und sollen aus Gründen der Übersichtlichkeit im Dashboard nicht angezeigt werden.
+Bei längeren Listen werden Einträge in verschiedenen Seiten unterteilt.\ Der Benutzer muss dabei die Pfeile auf der unteren Menüleiste betätigen, um seine gesamte Anmeldehistorie zu navigieren.\ Die Schaltflächen des Fensters sind
+so gestaltet, dass sie mit einem Hover-Effekt versehen sind, um eine Rückmeldung zu geben, sobald der Benutzer mit der Maus darüber fährt.\
+
+\subsection{Technologiewahl}
+\label{subsec:Technologiewahl}
+
+Für die Entwicklung der Anwendung wurde eine Auswahl an Technologien und Frameworks getroffen, die auf die Anforderungen des Projekts zugeschnitten sind, die gewählten Technologien
+tragen zur Effizienz, Wartbarkeit und Erweiterbarkeit des Systems dar.\ Bei den folgenden Punkten musste der Autor keine Auswahl treffen, da sich diese Technologien aus dem Projektkontext ergeben
+haben:
+
+\begin{itemize}
+	\item \textbf{Programmiersprache:} Java
+	\item \textbf{Framework:} OSGi
+	\item \textbf{Datenbankverwaltungssystem:} PostgreSQL
+	\item \textbf{GUI:} ZK-Framework
+	\item \textbf{Build- und Abhängigkeitsmanagement:} Maven
+	\item \textbf{Testing:} Testframework JUnit5 und Mockito zum Mocken externer Abhängigkeiten
+	\item \textbf{Versionierungssystem:} SVN
+\end{itemize}
+
+Wie im Abschnitt ... enthält das Parent-Submodul der Umsetzung alle wichtigen Abhängigkeiten und Plugin-Konfigurationen, die für den Build-Prozess, die Verwaltung und die Bereitstellung des Moduls von hoher Relevanz sind.
+Nur bei bestimmten Anforderungen wird die Konfiguration in der \textit{pom.xml} der API oder des Services bereitgestellt.
+
+Für die Webapplikation wird das ZK-Framework angewendet.\ Es handelt sich dabei um ein Open-Source-Framework für die Entwicklung von RIAs in Java.\ Dieses Framework bietet mehrere Vorteile im Entwicklungsprozess: Es ermöglicht
+einerseits die Erstellung von modernen Webanwendungen mit Java-Code und bietet viele vorgefertigte Komponente, die \textit{out-of-the-box} in Anwendungen eingebettet werden können.\ Andererseits unterstützt ZK unterschiedliche
+Architekturen \zB die datenbindungsfähige Architektur zum Binden von UI-Komponenten an Java-Objekte und das MVC-\bzw MVVM-Muster zur Trennung der Präsentationsschicht und der Geschäftslogik.\ UI-Komponenten werden in der Regel in
+zul-Dateien deklariert: ZUL ist eine propietäre Sprache für die Erstellung intuitiver und übersichtlicher Oberflächen in ZK-basierten Anwendungen.
+
+\paragraph{Sonstige Abhängigkeiten}
+\label{par:Abhaengigkeiten}
+
+
+
 
 
 \subsection{Geschäftslogik}
@@ -68,20 +135,11 @@ Ein Klassendiagramm, welches die Klassen der Anwendung und deren Beziehungen unt
 
 \Abbildung{Modulimport} zeigt den grundsätzlichen Programmablauf beim Einlesen eines Moduls als \ac{EPK}.
 \begin{figure}[htb]
-\centering
-\includegraphicsKeepAspectRatio{modulimport.pdf}{0.9}
-\caption{Prozess des Einlesens eines Moduls}
-\label{fig:Modulimport}
+	\centering
+	\includegraphicsKeepAspectRatio{modulimport.pdf}{0.9}
+	\caption{Prozess des Einlesens eines Moduls}
+	\label{fig:Modulimport}
 \end{figure}
-
-
-\subsection{Maßnahmen zur Qualitätssicherung}
-\label{sec:Qualitaetssicherung}
-\begin{itemize}
-	\item Welche Maßnahmen werden ergriffen, um die Qualität des Projektergebnisses (siehe Kapitel~\ref{sec:Qualitaetsanforderungen}: \nameref{sec:Qualitaetsanforderungen}) zu sichern (\zB automatische Tests, Anwendertests)?
-	\item \Ggfs Definition von Testfällen und deren Durchführung (durch Programme/Benutzer).
-\end{itemize}
-
 
 \subsection{Pflichtenheft/Datenverarbeitungskonzept}
 \label{sec:Pflichtenheft}
@@ -89,5 +147,17 @@ Ein Klassendiagramm, welches die Klassen der Anwendung und deren Beziehungen unt
 	\item Auszüge aus dem Pflichtenheft/Datenverarbeitungskonzept, wenn es im Rahmen des Projekts erstellt wurde.
 \end{itemize}
 
+% TODO: Löschen
+\subsection{Architekturdesign}
+\label{sec:Architekturdesign}
+\begin{itemize}
+	\item Beschreibung und Begründung der gewählten Anwendungsarchitektur (\zB \acs{MVC}).
+	\item \Ggfs Bewertung und Auswahl von verwendeten Frameworks sowie \ggfs eine kurze Einführung in die Funktionsweise des verwendeten Frameworks.
+\end{itemize}
+
 \paragraph{Beispiel}
-Ein Beispiel für das auf dem Lastenheft (siehe Kapitel~\ref{sec:Lastenheft}: \nameref{sec:Lastenheft}) aufbauende Pflichtenheft ist im \Anhang{app:Pflichtenheft} zu finden.
+Anhand der Entscheidungsmatrix in Tabelle~\ref{tab:Entscheidungsmatrix} wurde für die Implementierung der Anwendung das \acs{PHP}-Framework Symfony\footnote{\Vgl \citet{Symfony}.} ausgewählt. 
+
+\tabelle{Entscheidungsmatrix}{tab:Entscheidungsmatrix}{Nutzwert.tex}
+
+
