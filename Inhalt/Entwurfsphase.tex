@@ -14,7 +14,7 @@ Die OSGi-Architektur besteht aus den folgenden Schichten:
 \label{subsubsec:Modulschicht}
 
 Die Modulschicht enthält die OSGi-Bundles und verwaltet sie anhand von vorhandenen Metadaten.\ Bei OSGi gibt es keine globale Klassenpfade, sondern werden die
-Abhängigkeiten von jedem Bundle explizit in der Manifestdatei definiert.\ Dadurch kann das Framework den Klassenpfad für jedes Bundle einzeln berechnen und somit mehrere
+Abhängigkeiten von jedem Bundle explizit im Manifest definiert.\ Dadurch kann das Framework den Klassenpfad für jedes Bundle einzeln berechnen und somit mehrere
 Versionen von einer Komponente gleichzeitig verwalten.
 
 \subsubsection{Lebenszyklusebene}
@@ -83,7 +83,7 @@ DAO-Klassen, die CRUD-Operationen wie \textit{create, read, update} und \textit{
 \subsection{Entwurf der Benutzeroberfläche}
 \label{subsec:Benutzeroberflaeche}
 
-Vor der Implementierung wurde ein Prototyp entworfen, der in Anhang ... zu sehen ist.\ Dabei wurden die Design-Vorgaben und Usability-Anforderungen vom Product Owner stets berücksichtigt.
+Vor der Implementierung wurde ein Prototyp entworfen, der in Anhang (...) zu sehen ist.\ Dabei wurden die Design-Vorgaben und Usability-Anforderungen vom Product Owner stets berücksichtigt.
 Der Zugriff auf den Anmeldeverlauf erfolgt über das Dashboard der Anwendung nach einer erfolgreichen Anmeldung über die Weboberfläche.\ Dafür wurde eine Schaltfläche mit dem Text "`Anmeldeverlauf ansehen"' unter
 Anmeldeinformationen hinzugefügt.\ Nach einmaligen Klick wird ein \textit{Popup}-Fenster eingeblendet, welches den Anmeldeverlauf in tabellarischer Form darstellt.\ Nur die wichtigsten Informationen wie Anmeldedatum, IP-Adresse,
 Browser, Betriebssystem und Gerät werden dem Benutzer angezeigt.\ Die in der Datenbank gespeicherten IDs dienen ausschließlich der Datenverwaltung im Backend und sollen aus Gründen der Übersichtlichkeit im Dashboard nicht angezeigt werden.
@@ -110,54 +110,70 @@ haben:
 Wie im Abschnitt ... enthält das Parent-Submodul der Umsetzung alle wichtigen Abhängigkeiten und Plugin-Konfigurationen, die für den Build-Prozess, die Verwaltung und die Bereitstellung des Moduls von hoher Relevanz sind.
 Nur bei bestimmten Anforderungen wird die Konfiguration in der \textit{pom.xml} der API oder des Services bereitgestellt.
 
-Für die Webapplikation wird das ZK-Framework angewendet.\ Es handelt sich dabei um ein Open-Source-Framework für die Entwicklung von RIAs in Java.\ Dieses Framework bietet mehrere Vorteile im Entwicklungsprozess: Es ermöglicht
-einerseits die Erstellung von modernen Webanwendungen mit Java-Code und bietet viele vorgefertigte Komponente, die \textit{out-of-the-box} in Anwendungen eingebettet werden können.\ Andererseits unterstützt ZK unterschiedliche
+Für die Webapplikation wird das ZK-Framework angewendet.\ Es handelt sich dabei um ein serverseitiges UI-Framework für die Entwicklung von RIAs in Java.\ Dieses Framework bietet mehrere Vorteile im Entwicklungsprozess: Es ermöglicht
+einerseits die Erstellung von modernen Webanwendungen mit Java-Code und bietet viele vorgefertigte Komponenten, die \textit{out-of-the-box} in Anwendungen eingebettet werden können\ Andererseits unterstützt ZK unterschiedliche
 Architekturen \zB die datenbindungsfähige Architektur zum Binden von UI-Komponenten an Java-Objekte und das MVC-\bzw MVVM-Muster zur Trennung der Präsentationsschicht und der Geschäftslogik.\ UI-Komponenten werden in der Regel in
-zul-Dateien deklariert: ZUL ist eine propietäre Sprache für die Erstellung intuitiver und übersichtlicher Oberflächen in ZK-basierten Anwendungen.
+zul-Dateien erstellt: ZUL ist eine propietäre Sprache für die Erstellung intuitiver und übersichtlicher Oberflächen in ZK-basierten Anwendungen.
 
 \paragraph{Sonstige Abhängigkeiten}
 \label{par:Abhaengigkeiten}
 
+Die Auswahl einer Abhängigkeit zur Verarbeitung des User-Agent-String wurde anhand einer Nutzwertanalyse durchgeführt, dabei wurden bestimmte Kriterien mit unterschiedlichen Gewichtungen festgelegt.\ Eine Übersicht der durchgeführten
+Analyse kann aus dem Anhang(...) entnommen werden.\ Die Bewertung der Abhängigkeiten erfolgte über eine Skala von 0 bis 2, wobei 0 \textit{nicht erfüllt} und 2 \textit{vollständig erfüllt} entsprechen.\ Unmittelbar nach der Bewertung wurden
+die Werte mit der entsprechenden Gewichtung multipliziert.\ Das Gesamtergebnis für jedes Framework ergibt sich aus der Summe der Bewertungen jeder Kategorie.
 
+Aus der Nutzwertanalyse haben sich zwei mögliche Abhängigkeiten herauskristallisiert, deren Gesamtbewertung am höchsten unter allen fünf Kandidaten lag, nämlich der \textit{ua-parser} \bzw {User-Agent-Parser für Java} und \textit{yauaa)}, ausgeschrieben
+\textit{Yet Another User Parser}.\ Obwohl das zweite Framework durch seine vielfältigen Funktionen, ausführliche Dokumentation und Stabilität insgesamt eine höhere Punktzahl erreicht hat, war die erste Abhängigkeit durch ihr schlankes Design und Leichtgewichtigkeit
+für die Umsetzung der Projektanforderungen besser geeignet und wurde deswegen für die Umsetzung des PoCs verwendet.
 
+Zudem wurde für automatische Abbildung (Mapping) zwischen Entitäten und DTOs die Dependency \textit{Mapstruct} verwendet.\ Es handelt sich um ein Java-basierendes Code-Generierungsframework, das zur Vereinfachung und Automatisierung der Mappings
+beiträgt, indem es zur Entwicklungszeit optimierten Quellcode generiert.\ Für jedes Entität-DTO-Paar wurde eine Mapper-Schnittstelle im Service-Modul angelegt, welche geeignete Mapping-Methoden zur Kompilierzeit generiert.\ Mapstruct reduziert
+den manuellen Aufwand bei der Erstellung von Mapping-Logik und sorgt für lesbaren und wartbaren Code.
 
+Mit dem Ziel die Datensicherheit und Integrität der Anwendung zu verbessern, indem nur gültige IP-Adressen in der Anwendungsdatenbank gespeichert werden, wurde für die Umsetzung die Bibliothek \textit{Apache Commons Validator} verwendet.\ Diese Bibliothek bietet
+eine Sammlung vorgefertigter Validierungsfunktionen, die die Eingabedaten auf ihre Richtigkeit prüfen.\ Durch das Einbinden dieser Bibliothek wird die Verwendung komplexer Regex-Muster vermieden.
 
 \subsection{Geschäftslogik}
-\label{sec:Geschaeftslogik}
+\label{subsec:Geschaeftslogik}
+% TODO: Verweis auf Abschnitt "Sonstige Abhängigkeiten"
+Im Abschnitt (...) wurde beschrieben, dass der Autor ein modulares Architekturdesign für das Service-Modul verwendet hat.\ Für die Planung der Geschäftslogik wurde ein Klassendiagramm (siehe Anhang (...))mit den wichtigsten Klassen dieses Moduls entworfen.\ Der Zugriff
+auf die konkrete Implementierung des Services erfolgt über eine Schnittstelle im API-Modul namens \texttt{LoginAuditBF}, die gewisse Methoden bereitstellt, die vom \texttt{LoginAuditService} implementiert werden müssen.\ Der Service enthält ein Feld vom Typ
+\texttt{LoginAuditHandler}, der einen Eintrittspunkt zur zentralen DAO-Klasse bietet, deren Funktion darin besteht, die Datenbanktabellen zu verwalten.\ Im Konstruktor des Handlers wird über einen Singleton der Klasse \texttt{LoginAuditServiceDAOFactory} auf Basis des DBMS entschieden,
+welche Art von DAO-Klasse zurückgegeben werden soll.\ Hierfür gibt es nur zwei Möglichkeiten: entweder eine Oracle-Datenbank, die einen \texttt{LoginAuditServiceDAOHandlerOracle} zurückgibt, oder die Standard-PosgreSQL-Datenbank mit \texttt{LoginAuditServiceDAOHandlerJPA}.\ Beide der
+genannten Klassen implementieren eine dieselbe Schnittstelle mit Standard-Methoden.\ In der Methode \texttt{saveLoginHistory} werden die Client-Informationen aus dem UserAgent-String mithilfe der ausgewählten Bibliothek extrahiert und in DTO-Instanzen eingekapselt.\ Im nächsten Schritt
+findet eine Validierung der IP-Adresse anhand der \texttt{InnetAddressValidator}, die von der \textit{Apache Commons Validator}-Dependency zur Verfügung gestellt wird\ Anschließend wird ein\texttt{LoginHistoryDTO}-Objekt mit der Benutzer-ID, der IP-Adresse, und den Client-Informationen erzeugt
+und dem \texttt{DAO-Handler} zur Speicherung in der Datenbank weitergegeben.
 
-\begin{itemize}
-	\item Modellierung und Beschreibung der wichtigsten (!) Bereiche der Geschäftslogik (\zB mit Kom\-po\-nen\-ten-, Klassen-, Sequenz-, Datenflussdiagramm, Programmablaufplan, Struktogramm, \ac{EPK}).
-	\item Wie wird die erstellte Anwendung in den Arbeitsfluss des Unternehmens integriert?
-\end{itemize}
+Die konkreten Implementierungen der Schnittstelle \texttt{LoginAuditServiceDAOHandler} enthalten Felder für jede DAO-Klasse \zB \texttt{ClientDAO} oder \texttt{LoginHistoryDAO},
+die Daten in der Persistenzschicht anhand des entsprechenden \texttt{EntityManager}s verwalten.\ Zur Vereinheitlichung der Datenbankqueries und Vermeidung von Code-Duplikationen wurde
+eine Standard-\bzw \texttt{BaseDAO}-Klasse entworfen, die gängige CRUD-Operationen in Methoden bereitstellt und von allen anderen DAO-Klassen erweitert wird.\ Zudem wurde eine Schnittstelle für die
+Methodendefinition der DAO-Klassen entworfen.\ Alle Datenbankabfragen werden innerhalb von Transaktionen ausgeführt, die der entsprechende EntityManager verwaltet.\ Im Falle eines Fehlers während der Ausführung wird die Datenbanktabelle zum ursprünglichen Zustand zurückgestellt,
+\dh dass Transaktionen atomar ausgeführt werden - dabei es gibt keinen Zwischenzustand, nur einen Anfangs- und einen Endzustand, was die Wahrscheinlichkeit von Anomalien in der Datenbank deutlich reduziert.
 
-\paragraph{Beispiel}
-Ein Klassendiagramm, welches die Klassen der Anwendung und deren Beziehungen untereinander darstellt kann im \Anhang{app:Klassendiagramm} eingesehen werden.
+Beim Anlegen neuer LoginHistory-Einträge wird ausführlich geprüft, ob die vorliegenden Daten schon gespeichert wurden.\ Aus diesem Grund geht die \textit{save}-Methode von unten nach unten in der Tabellenhierarchie und sucht nach Übereinstimmungen in der Datenbank.\ Sollte die Suche
+keine Ergebnisse liefern, wird einen Eintrag in der entsprechenden Tabelle erzeugt.\ Durch die Primär-Fremdschlüsselbeziehung zwischen den Tabellen, \zB bei Client und UserAgent, muss gewährleistet werden, die Einträge auf gültige Einträge in anderen Tabellen verweisen, ansonsten wird
+die Transaktion nicht ausgeführt.
 
-\Abbildung{Modulimport} zeigt den grundsätzlichen Programmablauf beim Einlesen eines Moduls als \ac{EPK}.
-\begin{figure}[htb]
-	\centering
-	\includegraphicsKeepAspectRatio{modulimport.pdf}{0.9}
-	\caption{Prozess des Einlesens eines Moduls}
-	\label{fig:Modulimport}
-\end{figure}
+Im \Anhang{app:Klassendiagramm} kann sich der Leser einen Überblick des Klassendiagramms verschaffen, welches die Klassen der Anwendung und deren Beziehungen untereinander darstellt.
+
+%\Abbildung{Modulimport} zeigt den grundsätzlichen Programmablauf beim Einlesen eines Moduls als \ac{EPK}.
+%\begin{figure}[htb]
+%	\centering
+%	\includegraphicsKeepAspectRatio{modulimport.pdf}{0.9}
+%	\caption{Prozess des Einlesens eines Moduls}
+%	\label{fig:Modulimport}
+%\end{figure}
 
 \subsection{Pflichtenheft/Datenverarbeitungskonzept}
-\label{sec:Pflichtenheft}
-\begin{itemize}
-	\item Auszüge aus dem Pflichtenheft/Datenverarbeitungskonzept, wenn es im Rahmen des Projekts erstellt wurde.
-\end{itemize}
+\label{subsec:Pflichtenheft}
+
+Unmittelbar nach der Entwurfsphase wurde ein Pflichtenheft auf Basis des Lastenhefts im Anhang (...). In diesem beschreibt der Autor, wie er die Kundenanforderungen im Rahmen dieses Abschlussprojekts implementieren möchte.\ Ein Auszug aus dem Pflichtenheft befindet sich im Anhang
+(...) auf Seite (...).
 
 % TODO: Löschen
-\subsection{Architekturdesign}
-\label{sec:Architekturdesign}
-\begin{itemize}
-	\item Beschreibung und Begründung der gewählten Anwendungsarchitektur (\zB \acs{MVC}).
-	\item \Ggfs Bewertung und Auswahl von verwendeten Frameworks sowie \ggfs eine kurze Einführung in die Funktionsweise des verwendeten Frameworks.
-\end{itemize}
-
-\paragraph{Beispiel}
-Anhand der Entscheidungsmatrix in Tabelle~\ref{tab:Entscheidungsmatrix} wurde für die Implementierung der Anwendung das \acs{PHP}-Framework Symfony\footnote{\Vgl \citet{Symfony}.} ausgewählt. 
-
-\tabelle{Entscheidungsmatrix}{tab:Entscheidungsmatrix}{Nutzwert.tex}
+%\paragraph{Beispiel}
+%Anhand der Entscheidungsmatrix in Tabelle~\ref{tab:Entscheidungsmatrix} wurde für die Implementierung der Anwendung das \acs{PHP}-Framework Symfony\footnote{\Vgl \citet{Symfony}.} ausgewählt.
+%
+%\tabelle{Entscheidungsmatrix}{tab:Entscheidungsmatrix}{Nutzwert.tex}
 
 
