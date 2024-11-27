@@ -2,43 +2,54 @@
 \section{Einleitung}
 \label{sec:Einleitung}
 
+\subsection{Projektziel}
+\label{subsec:Projektziel}
 
-\subsection{Projektumfeld} 
-\label{sec:Projektumfeld}
-\begin{itemize}
-	\item Kurze Vorstellung des Ausbildungsbetriebs (Geschäftsfeld, Mitarbeiterzahl \usw)
-	\item Wer ist Auftraggeber/Kunde des Projekts?
-\end{itemize}
+Das Abschlussprojekt hat das Ziel, die BFM-Anwendung zu erweitern, indem die Login-Aktivitäten von Benutzern über die Webapplikation nachverfolgt und übersichtlich im Frontend
+dargestellt werden.\ Diese Anpassung soll dem Benutzer Klarheit über seine Kontoaktivitäten verschaffen und gleichzeitig das BFM-Team entlasten, da dadurch erwartet wird, dass
+einige Support-Fälle verhindert werden können.\ Im Zuge dessen muss die Anzeige möglichst benutzerfreundlich und einfach zu bedienen sein.
 
+In früheren BFM-Versionen führte die Anzeige eines Zeitstempels mit dem Hinweis \textit{Zuletzt angemeldet} im Dashboard unter Anmeldeinformationen zu Verwirrung bei den Benutzern.\
+Mit dem Vermerk, dass sich der Zeitstempel ausschließlich auf die letzte Anmeldung über die Webapplikation bezieht, wurde dieses Problem nur vorläufig behoben.\ Jedoch haben Kunden immer wieder den
+Wunsch nach einem Anmeldeverlauf geäußert, auf dem sie folgenden Informationen nachsehen können: Datum, Anmeldeort (IP-Adresse) und Angaben zum verwendeten Client, \zB bei einer Anmeldung über die Webapp
+die App oder den SyncClient.
 
-\subsection{Projektziel} 
-\label{sec:Projektziel}
-\begin{itemize}
-	\item Worum geht es eigentlich?
-	\item Was soll erreicht werden?
-\end{itemize}
+Hauptziele des Projekts sind die Verbesserung der Usability vom BFM durch die Bereitstellung eines Anmeldeverlaufs für die Webapplikation.
 
+\subsection{Teilaufgaben}
+\label{subsec:Teilaufgaben}
 
-\subsection{Projektbegründung} 
-\label{sec:Projektbegruendung}
-\begin{itemize}
-	\item Warum ist das Projekt sinnvoll (\zB Kosten- oder Zeitersparnis, weniger Fehler)?
-	\item Was ist die Motivation hinter dem Projekt?
-\end{itemize}
+Das Projekt gliederte sich in mehrere Phasen, darunter Projektplanung, die Analyse des aktuellen Zustands, der Entwurf einer Lösung unter Berücksichtigung %kaufmännischer,%
+wirtschaftlicher und technologischer Aspekte, die Umsetzung und die Qualitätsprüfung durch Tests, um die Anforderungen systematisch umzusetzen.\ Die Analyse- und Entwurfsphasen waren besonders wichtig,
+da sie die Grundlage für die erfolgreiche Umsetzung des Projekts bildeten.
 
+\subsection{Kundenwünsche}
+\label{subsec:Kundenwuensche}
+
+Die Kundenanforderungen umfassten eine benutzerfreundliche und intuitive Oberfläche, die mit dem Corporate-Design des Unternehmens im Einklang steht.\
+Zu den wichtigsten Anforderungen gehörten die Speicherung von Datum und Anmeldestandort bei jeder Anmeldung sowie die Bereitstellung der Lösung in einem dedizierten Modul mit einer öffentlichen API,
+die von anderen Komponenten der Anwendung bedient werden kann.\ Dies soll eine Überladung bereits vorhandener Module verhindern sowie die Wartbarkeit und Skalierbarkeit der Lösung sicherstellen.
+Darüber hinaus wurde als optionale Anforderung das Einholen von Client-Informationen gewünscht.
+
+\subsection{Projektumfeld}
+\label{subsec:Projektumfeld}
+
+Als IT-Dienstleister entwickelt doubleSlash seit 25 Jahren innovative Softwarelösungen und bietet eine breite Palette an Dienstleistungen an.\ Das Unternehmen unterstützt seine Kunden während des gesamten
+Entwicklungszyklus - von der Explorationsphase über Konzeption und Planung neuer Softwareprojekte bis hin zur Implementierung, Testung und dem laufenden Betrieb.\ Die Firma doubleSlash ist vor allem in der Mobilitätbranche
+in verschiedenen Projekten aktiv, erbringt aber auch Leistungen in der Medizintechnik, im Maschinen- und Anlagenbau, im Energiesektor, in der Logistik sowie im öffentlichen Sektor.
+Zudem entwickelt und vertreibt der Dienstleister sein eigenes Produkt namens BFM, eine kollaborative Plattform für den sicheren Datenaustausch über Unternehmensgrenzen hinweg, welche die Grundlage für diese Abschlussarbeit
+bildet.\ Veranlasst wurde die Produkterweiterung von Kerstin Glökler, wer die Rolle des Product Owners im BFM-Team innehat.\ Das Entwicklungsteam besteht aus mehreren erfahrenen Entwicklern sowie Nachwuchskräften, \ua Auszubildende, duale Studenten
+und Praktikanten.\ Das Projektmanagement erfolgt agil, mit regelmäßigen Meetings und Aufgaben, die in zwei- bis vierwöchigen Sprints umgesetzt werden.
 
 \subsection{Projektschnittstellen} 
-\label{sec:Projektschnittstellen}
-\begin{itemize}
-	\item Mit welchen anderen Systemen interagiert die Anwendung (technische Schnittstellen)?
-	\item Wer genehmigt das Projekt \bzw stellt Mittel zur Verfügung? 
-	\item Wer sind die Benutzer der Anwendung?
-	\item Wem muss das Ergebnis präsentiert werden?
-\end{itemize}
+\label{subsec:Projektschnittstellen}
 
+Die erfolgreiche Umsetzung des Projekts erforderte eine Zusammenarbeit mit verschiedenen Ansprechpartnern.\ Besonders wichtig war der Austausch
+mit dem Entwicklungsteam, welches bei technischen Fragen zum Architektur- und Datenmodell sowie Schnittstellen zur Anwendung mit Rat und Tat stand.\ Zu Beginn des Projekts fanden mehrere Meetings mit Frau Glöckler und Herrn Kreutzfeld statt,
+um die Projektanforderungen-, ziele sowie die Abgrenzungen zu definieren.\ Der Projektfortschritt wurde in kurzen Sync-Terminen mit dem Projektbetreuer abgestimmt und überprüft.
 
 \subsection{Projektabgrenzung} 
-\label{sec:Projektabgrenzung}
-\begin{itemize}
-	\item Was ist explizit nicht Teil des Projekts (\insb bei Teilprojekten)?
-\end{itemize}
+\label{subsec:Projektabgrenzung}
+
+Die Implementierung des Standort-Trackings für den BFM beschränkt sich auf die Weboberfläche.\ Änderungen an externen Komponenten wie mobile Apps oder Backend-Diensten sind nicht Bestandteil dieses Projekts.\ Da es sich um eine Evaluierung und den Entwurf eines Proof of Concepts(PoC) handelt, liegt
+der Fokus darauf, erste Erkenntnisse über die Machbarkeit und Optimierungspotenziale zu gewinnen.\ Die Ergebnisse aus diesem Projekt sollen als Grundlage für zukünftige Verbesserungen und die Einführung im Kundensystem dienen.
